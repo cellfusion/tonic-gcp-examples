@@ -14,3 +14,6 @@ prost-types = "0.6"
 [build-dependencies]
 tonic-build = "0.2"
 
+[[bin]]
+name = "pubsub"
+path = "src/pubsub.rs"
