@@ -17,3 +17,7 @@ tonic-build = "0.2"
 [[bin]]
 name = "pubsub"
 path = "src/pubsub.rs"
+
+[[bin]]
+name = "text_to_speech"
+path = "src/text_to_speech.rs"
