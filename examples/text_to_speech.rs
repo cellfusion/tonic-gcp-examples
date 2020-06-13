@@ -2,6 +2,10 @@ pub mod tts {
     tonic::include_proto!("google.cloud.texttospeech.v1");
 }
 
+use std::{
+    fs::File,
+    io::{BufWriter, Write},
+};
 use tonic::{
     metadata::MetadataValue,
     transport::{Certificate, Channel, ClientTlsConfig},
@@ -66,7 +70,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }))
         .await?;
 
-    println!("Response:{:?}", response);
+    let response = response.into_inner();
+
+    let mut writer = BufWriter::new(File::create("tts_response.wav").unwrap());
+    writer.write(&response.audio_content).unwrap();
 
     Ok(())
 }

@@ -1,2 +1,5 @@
 /target
-gcp_sa_key.json
+
+/gcp_sa_key.json
+
+/tts_response.wav
