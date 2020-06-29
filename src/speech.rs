@@ -1,5 +1,17 @@
-pub mod stt {
-    tonic::include_proto!("google.cloud.speech.v1");
+pub mod google {
+    pub mod rpc {
+        tonic::include_proto!("google.rpc");
+    }
+    pub mod longrunning {
+        tonic::include_proto!("google.longrunning");
+    }
+    pub mod cloud {
+        pub mod speech {
+            pub mod v1 {
+                tonic::include_proto!("google.cloud.speech.v1");
+            }
+        }
+    }
 }
 
 use std::{
