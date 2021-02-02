@@ -25,6 +25,11 @@ use tonic::{
 };
 use yup_oauth2;
 
+use google::cloud::speech::v1::{
+    speech_client::SpeechClient, streaming_recognize_request::StreamingRequest,
+    StreamingRecognitionConfig, StreamingRecognizeRequest,
+};
+
 pub const CERTIFICATES: &[u8] = include_bytes!("../data/gcp/roots.pem");
 static API_DOMAIN: &'static str = "speech.googleapis.com";
 static API_ENDPOINT: &'static str = "https://speech.googleapis.com";
@@ -47,9 +52,30 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .domain_name(API_DOMAIN);
 
     let channel = Channel::from_static(API_ENDPOINT)
-        .tls_config(tls_config)
+        .tls_config(tls_config)?
         .connect()
         .await?;
+
+    let mut client = SpeechClient::with_interceptor(channel, move |mut req: Request<()>| {
+        req.metadata_mut()
+            .insert("authorization", header_value.clone());
+        Ok(req)
+    });
+
+    let resp = client
+        .streaming_recognize(Request::new(StreamingRecognizeRequest {
+            streaming_request: Some(StreamingRequest::StreamingConfig(
+                StreamingRecognitionConfig {
+                    config: None,
+                    single_utterance: false,
+                    interim_results: false,
+                },
+            )),
+        }))
+        .await?;
+
+    let mut reader = hound::WavReader::open("../tts_response.wav").unwrap();
+    for sample in reader.samples::<i16>() {}
 
     Ok(())
 }

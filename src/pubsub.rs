@@ -2,7 +2,7 @@ pub mod pubsub {
     tonic::include_proto!("google.pubsub.v1");
 }
 
-use pubsub::{publisher_client::PublisherClient, ListTopicsRequest};
+use pubsub::{ListTopicsRequest, publisher_client::PublisherClient};
 use std::env;
 use tonic::{
     metadata::MetadataValue,
@@ -45,7 +45,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .domain_name(API_DOMAIN);
 
     let channel = Channel::from_static(API_ENDPOINT)
-        .tls_config(tls_config)
+        .tls_config(tls_config)?
         .connect()
         .await?;
 
