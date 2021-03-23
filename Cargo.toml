@@ -6,7 +6,7 @@ edition = "2018"
 
 [dependencies]
 yup-oauth2 = "5.0.2"
-tonic = { features = ["transport", "tls"], version = "0.4" }
+tonic = { features = ["transport", "tls", "prost"], version = "0.4" }
 tokio = { features = ["full"], version = "1.0"}
 prost = "0.7"
 prost-types = "0.7"

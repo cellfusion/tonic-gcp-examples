@@ -14,9 +14,13 @@ pub mod google {
     }
 }
 
+use google::cloud::speech::v1::{
+    recognition_audio::AudioSource, recognition_config::AudioEncoding, speech_client::SpeechClient,
+    RecognitionAudio, RecognitionConfig, RecognizeRequest, RecognizeResponse, SpeechContext,
+};
 use std::{
     fs::File,
-    io::{BufWriter, Write},
+    io::{BufWriter, Read, Write},
 };
 use tonic::{
     metadata::MetadataValue,
@@ -24,11 +28,6 @@ use tonic::{
     Request,
 };
 use yup_oauth2;
-
-use google::cloud::speech::v1::{
-    speech_client::SpeechClient, streaming_recognize_request::StreamingRequest,
-    StreamingRecognitionConfig, StreamingRecognizeRequest,
-};
 
 pub const CERTIFICATES: &[u8] = include_bytes!("../data/gcp/roots.pem");
 static API_DOMAIN: &'static str = "speech.googleapis.com";
@@ -62,20 +61,35 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         Ok(req)
     });
 
-    let resp = client
-        .streaming_recognize(Request::new(StreamingRecognizeRequest {
-            streaming_request: Some(StreamingRequest::StreamingConfig(
-                StreamingRecognitionConfig {
-                    config: None,
-                    single_utterance: false,
-                    interim_results: false,
-                },
-            )),
-        }))
-        .await?;
+    let mut file = File::open("./tts_response.wav")?;
+    let mut buf = Vec::<u8>::new();
+    file.read_to_end(&mut buf)?;
 
-    let mut reader = hound::WavReader::open("../tts_response.wav").unwrap();
-    for sample in reader.samples::<i16>() {}
+    let request = Request::new(RecognizeRequest {
+        config: Some(RecognitionConfig {
+            audio_channel_count: 1,
+            diarization_config: None,
+            enable_automatic_punctuation: false,
+            enable_separate_recognition_per_channel: false,
+            enable_word_time_offsets: false,
+            use_enhanced: false,
+            language_code: "ja-JP".to_string(),
+            max_alternatives: 1,
+            encoding: AudioEncoding::Linear16.into(),
+            model: "default".to_string(),
+            metadata: None,
+            profanity_filter: false,
+            sample_rate_hertz: 16000,
+            speech_contexts: Vec::<SpeechContext>::new(),
+        }),
+        audio: Some(RecognitionAudio {
+            audio_source: Some(AudioSource::Content(buf)),
+        }),
+    });
+
+    let resp = client.recognize(request).await?;
+
+    println!("response:{:?}", resp);
 
     Ok(())
 }
