@@ -3,6 +3,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         &[
             "proto/google/pubsub/v1/pubsub.proto",
             "proto/google/cloud/texttospeech/v1/cloud_tts.proto",
+            "proto/google/cloud/speech/v1/cloud_speech.proto",
         ],
         &["proto"],
     )?;

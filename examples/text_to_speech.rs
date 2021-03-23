@@ -39,7 +39,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .domain_name(API_DOMAIN);
 
     let channel = Channel::from_static(API_ENDPOINT)
-        .tls_config(tls_config)
+        .tls_config(tls_config)?
         .connect()
         .await?;
 
